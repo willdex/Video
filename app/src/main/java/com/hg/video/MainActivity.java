@@ -6,35 +6,48 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.service.quickaccesswallet.GetWalletCardsCallback;
 
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+import android.window.SplashScreen;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private WebView mWebView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_Video);
+
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
+        setContentView(R.layout.activity_main);
+
 
         setContentView(R.layout.activity_main);
-        WebView view = (WebView) findViewById(R.id.mywebView);
-        WebSettings faller = view.getSettings();
-        view.getSettings().setJavaScriptEnabled(true);
+        mWebView = (WebView) findViewById(R.id.mywebView);
+        WebSettings faller = mWebView.getSettings();
+        mWebView.getSettings().setJavaScriptEnabled(true);
         String url = "https://horizonteganadero.tv";
         faller.setJavaScriptEnabled(true);
-        view.setWebViewClient(new WebViewClient());
-        view.setWebChromeClient(new myChrome());
-        view.loadUrl("https://horizonteganadero.tv");
+        faller.setDomStorageEnabled(true);
+        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebChromeClient(new myChrome());
+        mWebView.loadUrl("https://horizonteganadero.tv");
 
-        view.setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 view.loadUrl("javascript:clickFunction()");
 
@@ -45,8 +58,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-    }
 
+
+    }
 
 
     public class myWebClient extends WebViewClient {
@@ -112,6 +126,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
+
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    if (mWebView.canGoBack()) {
+                        mWebView.goBack();
+                    } else {
+                        finish();
+                    }
+                    return true;
+            }
+
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
 }
 
