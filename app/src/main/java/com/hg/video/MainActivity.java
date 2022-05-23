@@ -1,19 +1,26 @@
 package com.hg.video;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.quickaccesswallet.GetWalletCardsCallback;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -22,9 +29,13 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 import android.window.SplashScreen;
 
+import java.net.URISyntaxException;
+
 public class MainActivity extends AppCompatActivity {
 
+
     private WebView mWebView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,22 +44,50 @@ public class MainActivity extends AppCompatActivity {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getSupportActionBar().hide();
-        setContentView(R.layout.activity_main);
 
 
         setContentView(R.layout.activity_main);
         mWebView = (WebView) findViewById(R.id.mywebView);
-        WebSettings faller = mWebView.getSettings();
         mWebView.getSettings().setJavaScriptEnabled(true);
         String url = "https://horizonteganadero.tv";
-        faller.setJavaScriptEnabled(true);
-        faller.setDomStorageEnabled(true);
+        mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.setWebChromeClient(new myChrome());
         mWebView.loadUrl("https://horizonteganadero.tv");
 
         mWebView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+
+                if (url.startsWith("whatsapp://")) {
+                    mWebView.stopLoading();
+                    try {
+                        Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
+                        whatsappIntent.setType("text/plain");
+                        whatsappIntent.setPackage("com.whatsapp");
+
+                        whatsappIntent.putExtra(Intent.EXTRA_TEXT, mWebView.getUrl() + "  - Shared from webview ");
+
+                        startActivity(whatsappIntent);
+                    } catch (android.content.ActivityNotFoundException ex) {
+
+                        String MakeShortText = "Whatsapp has not been installed";
+
+                        Toast.makeText(MainActivity.this, MakeShortText, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                return true;
+
+            }
+
+
+
             public void onPageFinished(WebView view, String url) {
+
+
                 view.loadUrl("javascript:clickFunction()");
 
 
@@ -58,19 +97,30 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
     }
 
 
     public class myWebClient extends WebViewClient {
 
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-        }
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -81,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         private WebChromeClient.CustomViewCallback mCustomViewCallback;
 
         private int mOriginalSystemUiVisibility;
+
+
 
 
 
@@ -124,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(3846);
         }
     }
+
 
 
 
